@@ -3,6 +3,7 @@ import { config } from "./config/database";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 import fastifyCors from "@fastify/cors";
+import fastifyWebsocket from "@fastify/websocket";
 
 import authPlugin from "./plugins/authenticate";
 import rabbitmqPlugin from "./plugins/rabbitmq";
@@ -35,9 +36,11 @@ mongoose
 
 // Routes will be registered here
 
+server.register(fastifyWebsocket);
+
+server.register(webSocketPlugin);
 server.register(authPlugin);
 server.register(rabbitmqPlugin);
-server.register(webSocketPlugin);
 
 server.register(authRoutes, { prefix: "/auth" });
 server.register(tweetRoutes, { prefix: "/tweets" });
@@ -47,18 +50,11 @@ server.register(directMessageRoutes, { prefix: "/directMessages" });
 server.register(notificationRoutes, { prefix: "/notifications" });
 server.register(listRoutes, { prefix: "/lists" });
 
-server.ready(async (err) => {
-  if (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
-  await tweetLikeConsumer(server);
-});
-
 const start = async () => {
   try {
     await server.listen({ port: Number(process.env.PORT) || 5000 });
     console.log(`Server is running on ${process.env.PORT || 5000}`);
+    await tweetLikeConsumer(server);
   } catch (err) {
     server.log.error(err);
     process.exit(1);

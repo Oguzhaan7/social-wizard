@@ -1,39 +1,30 @@
-import fastifyWebsocket from "@fastify/websocket";
 import fastifyPlugin from "fastify-plugin";
 
 async function websocketPlugin(fastify: any, options: any) {
   const connections = new Set();
 
-  fastify.get("/ws", { websocket: true }, (connection: any, req: any) => {
-    fastify.register(fastifyWebsocket);
+  fastify.decorate("broadcastLike", (tweetId: any) => {
+    for (let connection of connections) {
+      connection.send(
+        JSON.stringify({
+          type: "like",
+          tweetId,
+        })
+      );
+    }
+  });
+
+  fastify.get("/", { websocket: true }, (connection, req) => {
     connections.add(connection);
 
-    connection.socket.on("close", () => {
-      connection.delete(connection);
+    connection.on("close", () => {
+      connections.delete(connection);
     });
 
-    connection.socket.on("message", (message: any) => {
+    connection.on("message", (message: any) => {
       const data = JSON.parse(message);
       if (data.type === "like") {
-        for (let conn of connections) {
-          conn.socket.send(
-            JSON.stringify({
-              type: "like",
-              tweetId: data.tweetId,
-            })
-          );
-        }
-      }
-    });
-
-    fastify.decorate("broadcastLike", (tweetId: any) => {
-      for (let connection of connections) {
-        connection.socket.send(
-          JSON.stringify({
-            type: "like",
-            tweetId,
-          })
-        );
+        fastify.broadcastLike(data.tweetId);
       }
     });
   });
