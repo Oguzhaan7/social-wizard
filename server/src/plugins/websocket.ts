@@ -3,28 +3,32 @@ import fastifyPlugin from "fastify-plugin";
 async function websocketPlugin(fastify: any, options: any) {
   const connections = new Set();
 
-  fastify.decorate("broadcastLike", (tweetId: any) => {
+  fastify.decorate("broadcastLike", (tweetId: any, action: any) => {
     for (let connection of connections) {
       connection.send(
         JSON.stringify({
-          type: "like",
+          type: action,
           tweetId,
         })
       );
     }
   });
 
+  fastify.decorate("getConnections", () => {
+    return connections;
+  });
+
   fastify.get("/", { websocket: true }, (connection, req) => {
     connections.add(connection);
-
-    connection.on("close", () => {
+    fastify.connection.on("close", () => {
       connections.delete(connection);
     });
 
     connection.on("message", (message: any) => {
       const data = JSON.parse(message);
-      if (data.type === "like") {
-        fastify.broadcastLike(data.tweetId);
+      console.log(data);
+      if (data.type === "like" || data.type === "unlike") {
+        fastify.broadcastLike(data.tweetId, data.type);
       }
     });
   });

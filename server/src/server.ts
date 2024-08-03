@@ -9,7 +9,9 @@ import authPlugin from "./plugins/authenticate";
 import rabbitmqPlugin from "./plugins/rabbitmq";
 import webSocketPlugin from "./plugins/websocket";
 
-import tweetLikeConsumer from "./consumers/tweet.like.consumer";
+import producerManagerPlugin from "./utils/rabbitmq/producer.manager";
+import ConsumerManager from "./utils/rabbitmq/consumer.manager";
+import webSocketPublisher from "./utils/websocket/websocket.manager";
 
 import authRoutes from "./routes/auth.route";
 import tweetRoutes from "./routes/tweet.route";
@@ -34,13 +36,12 @@ mongoose
   .then(() => console.log("MongoDB connected..."))
   .catch((err) => console.log(err));
 
-// Routes will be registered here
-
 server.register(fastifyWebsocket);
 
 server.register(webSocketPlugin);
 server.register(authPlugin);
 server.register(rabbitmqPlugin);
+server.register(producerManagerPlugin);
 
 server.register(authRoutes, { prefix: "/auth" });
 server.register(tweetRoutes, { prefix: "/tweets" });
@@ -52,9 +53,14 @@ server.register(listRoutes, { prefix: "/lists" });
 
 const start = async () => {
   try {
+    await server.ready();
     await server.listen({ port: Number(process.env.PORT) || 5000 });
     console.log(`Server is running on ${process.env.PORT || 5000}`);
-    await tweetLikeConsumer(server);
+    await webSocketPublisher(server);
+
+    const consumerManager = new ConsumerManager(server);
+
+    await consumerManager.start();
   } catch (err) {
     server.log.error(err);
     process.exit(1);

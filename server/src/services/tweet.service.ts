@@ -48,15 +48,19 @@ export const likeTweet = async (
   const tweet = await Tweet.findById(tweetId);
   if (!tweet) return null;
 
-  tweet.likes.push(userId);
+  const userIndex = tweet.likes.indexOf(userId);
+  let action;
+
+  if (userIndex !== -1) {
+    tweet.likes.splice(userIndex, 1);
+    action = "unlike";
+  } else {
+    tweet.likes.push(userId);
+    action = "like";
+  }
+
   await tweet.save();
-
-  console.log(fastify.rabbitMQ);
-
-  fastify.rabbitMQ.channel.sendToQueue(
-    "tweet_likes",
-    Buffer.from(JSON.stringify({ tweetId }))
-  );
+  await fastify.sendTweetLikeNotification(tweetId, action);
 
   return tweet;
 };

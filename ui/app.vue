@@ -13,11 +13,11 @@ const socket = ref();
 const tweet = ref();
 
 onMounted(async () => {
-  const ss = await useFetch("/tweets/66a3674dadffef772347d0e1", {
+  const ss = await useFetch("/tweets/66a493672dce4f7862d338a3", {
     baseURL: runtimeConfig.public.baseURL,
     headers: {
       authorization:
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTM2NWU1YWRmZmVmNzcyMzQ3ZDBkZSIsImlhdCI6MTcyMTk4NDc2NX0._Xza9U72lwFzfxvp7ujnLMO03Rd4a9ZTo3fapeGY7Pg",
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YTQ5MzBmMmRjZTRmNzg2MmQzMzhhMCIsImlhdCI6MTcyMjYyMDQ5MH0.upb-b4AGosFZ6ewDUXwiTm1BF-yCmGUPu_-5XRznBkQ",
     },
   });
   tweet.value = ss.data.value;
@@ -26,22 +26,16 @@ onMounted(async () => {
 watchEffect(async () => {
   if (data.value) {
     messages.value.push(data.value);
-    tweet.value.likes?.push("66a365e5adffef772347d0de");
-    console.log("Message from server:", data.value);
+    data.value = JSON.parse(data.value);
+    console.log(data.value);
+    if (data.value.type === "like") {
+      tweet.value.likes?.push("66a365e5adffef772347d0de");
+    } else {
+      let likeIndex = tweet.value.likes.indexOf("66a365e5adffef772347d0de");
+      tweet.value.likes.splice(likeIndex, 1);
+    }
     data.value = "";
   }
-  // if (socket.value) {
-  //   socket.value.addEventListener("message", function (event) {
-  //     tweet.value.likes?.push("66a365e5adffef772347d0de");
-  //     console.log("Message from server", event.data);
-  //   });
-  //   socket.value.addEventListener("close", function (event) {
-  //     console.log("Disconnected from the WebSocket server");
-  //   });
-  //   socket.value.addEventListener("error", function (event) {
-  //     console.error("WebSocket error", event);
-  //   });
-  // }
 });
 </script>
 

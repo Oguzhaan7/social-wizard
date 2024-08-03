@@ -1,9 +1,12 @@
 import DirectMessage, { IDirectMessage } from "../models/DirectMessage";
+import { FastifyInstance } from "fastify";
 
 export const createDirectMessage = async (
+  fastify: FastifyInstance,
   messageData: Partial<IDirectMessage>
 ): Promise<IDirectMessage> => {
   const message = new DirectMessage(messageData);
+
   return await message.save();
 };
 
