@@ -6,19 +6,17 @@ export default defineNuxtConfig({
     "@nuxtjs/tailwindcss",
     "@formkit/auto-animate/nuxt",
     "@pinia/nuxt",
-    "nuxt-socket-io",
+    "@pinia/nuxt",
+  ],
+  plugins: [
+    {
+      src: "./plugins/websocket.js",
+      mode: "client",
+    },
   ],
   runtimeConfig: {
     public: {
       baseURL: process.env.BASE_URL || "http://localhost:5000",
     },
-  },
-  io: {
-    sockets: [
-      {
-        name: "main",
-        url: "http://localhost:3000",
-      },
-    ],
   },
 });

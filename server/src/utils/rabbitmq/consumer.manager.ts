@@ -26,7 +26,7 @@ class ConsumerManager {
     channel.consume("tweet_likes", (message) => {
       if (message) {
         const { tweetId, action } = JSON.parse(message.content.toString());
-        fastify.broadcastLike(tweetId, action);
+        fastify.tweetLikeOrUnlike(tweetId, action);
         console.log(`Tweet ID: ${tweetId}, Action: ${action}`);
         channel.ack(message);
       }

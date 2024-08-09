@@ -42,6 +42,7 @@ server.register(webSocketPlugin);
 server.register(authPlugin);
 server.register(rabbitmqPlugin);
 server.register(producerManagerPlugin);
+webSocketPublisher(server);
 
 server.register(authRoutes, { prefix: "/auth" });
 server.register(tweetRoutes, { prefix: "/tweets" });
@@ -56,7 +57,6 @@ const start = async () => {
     await server.ready();
     await server.listen({ port: Number(process.env.PORT) || 5000 });
     console.log(`Server is running on ${process.env.PORT || 5000}`);
-    await webSocketPublisher(server);
 
     const consumerManager = new ConsumerManager(server);
 

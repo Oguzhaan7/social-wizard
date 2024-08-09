@@ -14,8 +14,8 @@
     "@nuxtjs/tailwindcss": "^6.12.1",
     "@pinia/nuxt": "^0.5.2",
     "dotenv": "^16.4.5",
+    "jwt-decode": "^4.0.0",
     "nuxt": "^3.12.4",
-    "nuxt-socket-io": "^3.0.13",
     "pinia": "^2.2.0",
     "vue": "latest"
   },
